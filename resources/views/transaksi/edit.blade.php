@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tambah Transaksi – Pengelolaan Keuangan Harian</title>
+  <title>Edit Transaksi – Pengelolaan Keuangan Harian</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
@@ -28,9 +28,9 @@
     .gradient-title { background: linear-gradient(135deg,#d6336c 0%,#e8597a 40%,#c2185b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .form-input { background: rgba(255,255,255,0.75); border: 1.5px solid rgba(254,158,199,0.5); transition: all 0.25s ease; }
     .form-input:focus { outline: none; border-color: #f06292; box-shadow: 0 0 0 3px rgba(240,98,146,0.18); background: #fff; }
-    .btn-simpan { background: linear-gradient(135deg,#f06292 0%,#e91e8c 50%,#d81b87 100%); box-shadow: 0 4px 15px rgba(232,89,122,0.4); transition: all 0.3s ease; }
-    .btn-simpan:hover { box-shadow: 0 6px 24px rgba(232,89,122,0.6); transform: translateY(-2px) scale(1.02); }
-    .btn-simpan:active { transform: translateY(0px) scale(0.98); }
+    .btn-update { background: linear-gradient(135deg,#f9d76c 0%,#f5c518 50%,#e6b800 100%); box-shadow: 0 4px 15px rgba(245,197,24,0.35); transition: all 0.3s ease; }
+    .btn-update:hover { box-shadow: 0 6px 24px rgba(245,197,24,0.55); transform: translateY(-2px) scale(1.02); }
+    .btn-update:active { transform: translateY(0px) scale(0.98); }
     .btn-batal { background: rgba(255,255,255,0.7); border: 1.5px solid rgba(254,158,199,0.5); transition: all 0.25s ease; }
     .btn-batal:hover { background: #FE9EC7; border-color: #FE9EC7; }
   </style>
@@ -53,9 +53,9 @@
 
       {{-- Header --}}
       <div class="text-center mb-7">
-        <div class="text-4xl mb-2">💸</div>
-        <h1 class="gradient-title text-2xl font-black">Tambah Transaksi</h1>
-        <p class="text-gray-400 text-xs mt-1">Isi detail transaksi di bawah ini</p>
+        <div class="text-4xl mb-2">✏️</div>
+        <h1 class="gradient-title text-2xl font-black">Edit Transaksi</h1>
+        <p class="text-gray-400 text-xs mt-1">Ubah detail transaksi di bawah ini</p>
       </div>
 
       {{-- Validation Errors --}}
@@ -71,13 +71,15 @@
       @endif
 
       {{-- Form --}}
-      <form action="/transaksi" method="POST" class="space-y-5">
+      <form action="/transaksi/{{ $transaksi->id }}" method="POST" class="space-y-5">
         @csrf
+        @method('PUT')
 
         {{-- Tanggal --}}
         <div>
           <label class="block text-sm font-bold text-gray-600 mb-1.5">📅 Tanggal</label>
-          <input type="date" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}"
+          <input type="date" name="tanggal"
+                 value="{{ old('tanggal', $transaksi->tanggal) }}"
                  class="form-input w-full rounded-xl px-4 py-2.5 text-sm text-gray-700 font-medium" required />
         </div>
 
@@ -85,25 +87,24 @@
         <div>
           <label class="block text-sm font-bold text-gray-600 mb-1.5">🏷️ Jenis Transaksi</label>
           <select name="jenis" class="form-input w-full rounded-xl px-4 py-2.5 text-sm text-gray-700 font-medium" required>
-            <option value="" disabled {{ old('jenis') ? '' : 'selected' }}>-- Pilih Jenis --</option>
-            <option value="Pemasukan"   {{ old('jenis') === 'Pemasukan'   ? 'selected' : '' }}>⬆️ Pemasukan</option>
-            <option value="Pengeluaran" {{ old('jenis') === 'Pengeluaran' ? 'selected' : '' }}>⬇️ Pengeluaran</option>
+            <option value="Pemasukan"   {{ old('jenis', $transaksi->jenis) === 'Pemasukan'   ? 'selected' : '' }}>⬆️ Pemasukan</option>
+            <option value="Pengeluaran" {{ old('jenis', $transaksi->jenis) === 'Pengeluaran' ? 'selected' : '' }}>⬇️ Pengeluaran</option>
           </select>
         </div>
 
         {{-- Nominal --}}
         <div>
           <label class="block text-sm font-bold text-gray-600 mb-1.5">💵 Nominal (Rp)</label>
-          <input type="number" name="nominal" value="{{ old('nominal') }}" min="1"
-                 placeholder="contoh: 50000"
+          <input type="number" name="nominal" min="1"
+                 value="{{ old('nominal', $transaksi->nominal) }}"
                  class="form-input w-full rounded-xl px-4 py-2.5 text-sm text-gray-700 font-medium" required />
         </div>
 
         {{-- Keterangan --}}
         <div>
           <label class="block text-sm font-bold text-gray-600 mb-1.5">📝 Keterangan</label>
-          <input type="text" name="keterangan" value="{{ old('keterangan') }}"
-                 placeholder="contoh: Beli makan siang"
+          <input type="text" name="keterangan"
+                 value="{{ old('keterangan', $transaksi->keterangan) }}"
                  class="form-input w-full rounded-xl px-4 py-2.5 text-sm text-gray-700 font-medium" required />
         </div>
 
@@ -114,8 +115,8 @@
             Batal
           </a>
           <button type="submit"
-                  class="btn-simpan flex-1 text-white font-bold text-sm rounded-2xl px-5 py-3 cursor-pointer">
-            💾 Simpan Transaksi
+                  class="btn-update flex-1 text-gray-800 font-bold text-sm rounded-2xl px-5 py-3 cursor-pointer">
+            💾 Update Transaksi
           </button>
         </div>
       </form>
